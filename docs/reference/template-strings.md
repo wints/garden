@@ -102,6 +102,28 @@ Example:
 my-variable: ${project.name}
 ```
 
+### `${git.*}`
+
+Information about the current state of the project's local git repository.
+
+| Type     |
+| -------- |
+| `object` |
+
+### `${git.branch}`
+
+The current Git branch. Resolves to an empty string if the repository has no commits.
+
+| Type     |
+| -------- |
+| `string` |
+
+Example:
+
+```yaml
+my-variable: ${git.branch}
+```
+
 
 ## Environment configuration context
 
@@ -194,6 +216,28 @@ Example:
 
 ```yaml
 my-variable: ${project.name}
+```
+
+### `${git.*}`
+
+Information about the current state of the project's local git repository.
+
+| Type     |
+| -------- |
+| `object` |
+
+### `${git.branch}`
+
+The current Git branch. Resolves to an empty string if the repository has no commits.
+
+| Type     |
+| -------- |
+| `string` |
+
+Example:
+
+```yaml
+my-variable: ${git.branch}
 ```
 
 ### `${variables.*}`
@@ -320,6 +364,28 @@ Example:
 
 ```yaml
 my-variable: ${project.name}
+```
+
+### `${git.*}`
+
+Information about the current state of the project's local git repository.
+
+| Type     |
+| -------- |
+| `object` |
+
+### `${git.branch}`
+
+The current Git branch. Resolves to an empty string if the repository has no commits.
+
+| Type     |
+| -------- |
+| `string` |
+
+Example:
+
+```yaml
+my-variable: ${git.branch}
 ```
 
 ### `${variables.*}`
@@ -539,6 +605,28 @@ Example:
 
 ```yaml
 my-variable: ${project.name}
+```
+
+### `${git.*}`
+
+Information about the current state of the project's local git repository.
+
+| Type     |
+| -------- |
+| `object` |
+
+### `${git.branch}`
+
+The current Git branch. Resolves to an empty string if the repository has no commits.
+
+| Type     |
+| -------- |
+| `string` |
+
+Example:
+
+```yaml
+my-variable: ${git.branch}
 ```
 
 ### `${variables.*}`
@@ -928,6 +1016,28 @@ Example:
 my-variable: ${project.name}
 ```
 
+### `${git.*}`
+
+Information about the current state of the project's local git repository.
+
+| Type     |
+| -------- |
+| `object` |
+
+### `${git.branch}`
+
+The current Git branch. Resolves to an empty string if the repository has no commits.
+
+| Type     |
+| -------- |
+| `string` |
+
+Example:
+
+```yaml
+my-variable: ${git.branch}
+```
+
 ### `${variables.*}`
 
 A map of all variables defined in the project configuration, including environment-specific variables.
@@ -1310,6 +1420,28 @@ Example:
 
 ```yaml
 my-variable: ${project.name}
+```
+
+### `${git.*}`
+
+Information about the current state of the project's local git repository.
+
+| Type     |
+| -------- |
+| `object` |
+
+### `${git.branch}`
+
+The current Git branch. Resolves to an empty string if the repository has no commits.
+
+| Type     |
+| -------- |
+| `string` |
+
+Example:
+
+```yaml
+my-variable: ${git.branch}
 ```
 
 ### `${variables.*}`

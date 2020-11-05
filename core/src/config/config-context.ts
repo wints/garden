@@ -296,6 +296,21 @@ class ProjectContext extends ConfigContext {
   }
 }
 
+class GitContext extends ConfigContext {
+  @schema(
+    joi
+      .string()
+      .description("The current Git branch. Resolves to an empty string if the repository has no commits.")
+      .example("my-feature-branch")
+  )
+  public branch: string
+
+  constructor(root: ConfigContext, branch: string) {
+    super(root)
+    this.branch = branch
+  }
+}
+
 /**
  * This context is available for template strings in the `defaultEnvironment` field in project configs.
  */
@@ -310,17 +325,25 @@ export class DefaultEnvironmentContext extends ConfigContext {
   @schema(ProjectContext.getSchema().description("Information about the Garden project."))
   public project: ProjectContext
 
+  @schema(
+    GitContext.getSchema().description("Information about the current state of the project's local git repository.")
+  )
+  public git: GitContext
+
   constructor({
     projectName,
     artifactsPath,
+    branch,
     username,
   }: {
     projectName: string
     artifactsPath: string
+    branch: string
     username?: string
   }) {
     super()
     this.local = new LocalContext(this, artifactsPath, username)
+    this.git = new GitContext(this, branch)
     this.project = new ProjectContext(this, projectName)
   }
 }
@@ -328,6 +351,7 @@ export class DefaultEnvironmentContext extends ConfigContext {
 export interface ProjectConfigContextParams {
   projectName: string
   artifactsPath: string
+  branch: string
   username?: string
   secrets: PrimitiveMap
 }
@@ -341,16 +365,6 @@ export interface ProjectConfigContextParams {
  */
 export class ProjectConfigContext extends DefaultEnvironmentContext {
   @schema(
-    LocalContext.getSchema().description(
-      "Context variables that are specific to the currently running environment/machine."
-    )
-  )
-  public local: LocalContext
-
-  @schema(ProjectContext.getSchema().description("Information about the Garden project."))
-  public project: ProjectContext
-
-  @schema(
     joiStringMap(joi.string().description("The secret's value."))
       .description("A map of all secrets for this project in the current environment.")
       .meta({
@@ -360,8 +374,8 @@ export class ProjectConfigContext extends DefaultEnvironmentContext {
   )
   public secrets: PrimitiveMap
 
-  constructor({ projectName, artifactsPath, username, secrets }: ProjectConfigContextParams) {
-    super({ projectName, artifactsPath, username })
+  constructor({ projectName, artifactsPath, branch, username, secrets }: ProjectConfigContextParams) {
+    super({ projectName, artifactsPath, branch, username })
     this.secrets = secrets
   }
 }
@@ -370,16 +384,6 @@ export class ProjectConfigContext extends DefaultEnvironmentContext {
  * This context is available for template strings for all `environments[]` fields (except name)
  */
 export class EnvironmentConfigContext extends ProjectConfigContext {
-  @schema(
-    LocalContext.getSchema().description(
-      "Context variables that are specific to the currently running environment/machine."
-    )
-  )
-  public local: LocalContext
-
-  @schema(ProjectContext.getSchema().description("Information about the Garden project."))
-  public project: ProjectContext
-
   @schema(
     joiVariables()
       .description("A map of all variables defined in the project configuration.")
@@ -403,17 +407,19 @@ export class EnvironmentConfigContext extends ProjectConfigContext {
   constructor({
     projectName,
     artifactsPath,
+    branch,
     username,
     variables,
     secrets,
   }: {
     projectName: string
     artifactsPath: string
+    branch: string
     username?: string
     variables: DeepPrimitiveMap
     secrets: PrimitiveMap
   }) {
-    super({ projectName, artifactsPath, username, secrets })
+    super({ projectName, artifactsPath, branch, username, secrets })
     this.variables = this.var = variables
   }
 }
@@ -478,6 +484,7 @@ export class WorkflowConfigContext extends EnvironmentConfigContext {
     super({
       projectName: garden.projectName,
       artifactsPath: garden.artifactsPath,
+      branch: garden.vcsBranch,
       username: garden.username,
       variables: garden.variables,
       secrets: garden.secrets,

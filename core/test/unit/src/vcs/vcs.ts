@@ -44,6 +44,10 @@ class TestVcsHandler extends VcsHandler {
     return undefined
   }
 
+  async getBranchName() {
+    return "main"
+  }
+
   async getTreeVersion(log: LogEntry, projectName: string, moduleConfig: ModuleConfig) {
     return this.testVersions[moduleConfig.path] || super.getTreeVersion(log, projectName, moduleConfig)
   }

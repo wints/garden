@@ -128,6 +128,7 @@ export interface GardenOpts {
 
 export interface GardenParams {
   artifactsPath: string
+  vcsBranch: string
   buildDir: BuildDir
   clientAuthToken: string | null
   enterpriseDomain: string | null
@@ -194,6 +195,7 @@ export class Garden {
   public readonly buildDir: BuildDir
   public readonly gardenDirPath: string
   public readonly artifactsPath: string
+  public readonly vcsBranch: string
   public readonly opts: GardenOpts
   private readonly providerConfigs: GenericProviderConfig[]
   public readonly workingCopyId: string
@@ -219,6 +221,7 @@ export class Garden {
     this.gardenDirPath = params.gardenDirPath
     this.log = params.log
     this.artifactsPath = params.artifactsPath
+    this.vcsBranch = params.vcsBranch
     this.opts = params.opts
     this.rawOutputs = params.outputs
     this.production = params.production
@@ -309,9 +312,13 @@ export class Garden {
     // Connect to the state storage
     await ensureConnected()
 
+    const { sources: projectSources, path: projectRoot } = config
+
+    const vcsBranch = (await new GitHandler(gardenDirPath, []).getBranchName(log, projectRoot)) || ""
+
     const defaultEnvironmentName = resolveTemplateString(
       config.defaultEnvironment,
-      new DefaultEnvironmentContext({ projectName, artifactsPath, username: _username })
+      new DefaultEnvironmentContext({ projectName, artifactsPath, branch: vcsBranch, username: _username })
     ) as string
 
     const defaultEnvironment = getDefaultEnvironmentName(defaultEnvironmentName, config)
@@ -337,16 +344,18 @@ export class Garden {
       defaultEnvironment: defaultEnvironmentName,
       config,
       artifactsPath,
+      branch: vcsBranch,
       username: _username,
       secrets,
     })
 
-    const { sources: projectSources, path: projectRoot } = config
+    const vcs = new GitHandler(gardenDirPath, config.dotIgnoreFiles)
 
     let { namespace, providers, variables, production } = await pickEnvironment({
       projectConfig: config,
       envString: environmentStr,
       artifactsPath,
+      branch: vcsBranch,
       username: _username,
       secrets,
     })
@@ -361,12 +370,9 @@ export class Garden {
     const gardenDirExcludePattern = `${relative(projectRoot, gardenDirPath)}/**/*`
     const moduleExcludePatterns = [...((config.modules || {}).exclude || []), gardenDirExcludePattern, ...fixedExcludes]
 
-    // Ensure the project root is in a git repo
-    const vcs = new GitHandler(gardenDirPath, config.dotIgnoreFiles)
-    await vcs.getRepoRoot(log, projectRoot)
-
     const garden = new this({
       artifactsPath,
+      vcsBranch,
       sessionId,
       clientAuthToken,
       enterpriseDomain,
